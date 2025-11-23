@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { PrescriptionRecommendation, ConfirmationRequest } from '@shared/reasoning-model';
+import jsPDF from 'jspdf';
 
 interface ConfirmationPanelProps {
   recommendation: PrescriptionRecommendation;
@@ -26,8 +27,6 @@ export const ConfirmationPanel: React.FC<ConfirmationPanelProps> = ({
     clinicalNuance: false,
     patientPreference: false
   });
-  const [isSchedulingCall, setIsSchedulingCall] = useState(false);
-  const [callStatus, setCallStatus] = useState<string | null>(null);
 
   const handleReject = () => {
     if (showRejectionForm) {
@@ -37,49 +36,188 @@ export const ConfirmationPanel: React.FC<ConfirmationPanelProps> = ({
     }
   };
 
-  const handleScheduleCall = async () => {
-    setIsSchedulingCall(true);
-    setCallStatus('Initiating call...');
-
+  const handleExportPDF = () => {
     try {
-      console.log('[ConfirmationPanel] 📞 Scheduling follow-up call via VAPI');
+      console.log('[ConfirmationPanel] 📄 Generating PDF export...');
       
-      const response = await fetch('http://localhost:3000/api/vapi/call/outbound', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phoneNumber: '+18582108648', // Demo number
-          patientName: 'Demo Patient',
-          purpose: `Follow-up for ${recommendation.medication} ${recommendation.dosage} prescription`
-        })
+      const pdf = new jsPDF();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      let yPosition = 20;
+
+      // Header
+      pdf.setFillColor(74, 144, 226); // #4A90E2
+      pdf.rect(0, 0, pageWidth, 30, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('TemporalOS', margin, 15);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('AI-Powered Medication Recommendation', margin, 23);
+
+      // Date
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(10);
+      yPosition = 40;
+      pdf.text(`Generated: ${new Date().toLocaleString()}`, margin, yPosition);
+
+      // Divider
+      yPosition += 10;
+      pdf.setDrawColor(74, 144, 226);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+
+      // Medication Title
+      yPosition += 15;
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(46, 204, 113); // Green
+      pdf.text('RECOMMENDED MEDICATION', margin, yPosition);
+
+      // Medication Details
+      yPosition += 10;
+      pdf.setFontSize(14);
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${recommendation.medication}`, margin, yPosition);
+      
+      yPosition += 8;
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Dosage: ${recommendation.dosage}`, margin + 5, yPosition);
+      
+      yPosition += 6;
+      pdf.text(`Duration: ${recommendation.duration}`, margin + 5, yPosition);
+      
+      yPosition += 6;
+      pdf.setTextColor(74, 144, 226);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`Confidence: ${(recommendation.confidence * 100).toFixed(0)}%`, margin + 5, yPosition);
+
+      // Reasoning Section
+      yPosition += 15;
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('CLINICAL REASONING', margin, yPosition);
+      
+      yPosition += 8;
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      recommendation.reasoning.forEach((reason, idx) => {
+        const lines = pdf.splitTextToSize(`${idx + 1}. ${reason}`, pageWidth - 2 * margin - 5);
+        lines.forEach((line: string) => {
+          if (yPosition > 270) { // Check if near bottom of page
+            pdf.addPage();
+            yPosition = 20;
+          }
+          pdf.text(line, margin + 5, yPosition);
+          yPosition += 5;
+        });
+        yPosition += 2;
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || 'Failed to initiate call');
+      // Safety Checklist
+      yPosition += 10;
+      if (yPosition > 250) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('SAFETY CHECKLIST', margin, yPosition);
+      
+      yPosition += 8;
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      
+      const safetyItems = [
+        { label: 'Renal dosing verified', checked: recommendation.safetyChecklist.renalDosing },
+        { label: 'No drug interactions', checked: recommendation.safetyChecklist.drugInteractions },
+        { label: 'No relevant allergies', checked: recommendation.safetyChecklist.allergies },
+        { label: 'Meets guideline criteria', checked: recommendation.safetyChecklist.guidelineAlignment }
+      ];
+
+      safetyItems.forEach(item => {
+        pdf.setTextColor(item.checked ? 46 : 231, item.checked ? 204 : 76, item.checked ? 113 : 60);
+        pdf.text(`${item.checked ? '✔' : '✗'} ${item.label}`, margin + 5, yPosition);
+        yPosition += 6;
+      });
+
+      // Citations
+      if (recommendation.citations.length > 0) {
+        yPosition += 10;
+        if (yPosition > 250) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('EVIDENCE-BASED CITATIONS', margin, yPosition);
+        
+        yPosition += 8;
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'italic');
+        recommendation.citations.forEach((citation, idx) => {
+          const lines = pdf.splitTextToSize(`[${idx + 1}] ${citation}`, pageWidth - 2 * margin - 5);
+          lines.forEach((line: string) => {
+            if (yPosition > 270) {
+              pdf.addPage();
+              yPosition = 20;
+            }
+            pdf.text(line, margin + 5, yPosition);
+            yPosition += 5;
+          });
+          yPosition += 2;
+        });
       }
 
-      const result = await response.json();
-      console.log('[ConfirmationPanel] ✅ Call initiated:', result);
+      // Alternatives (if available)
+      if ((recommendation as any).alternatives && (recommendation as any).alternatives.length > 0) {
+        yPosition += 10;
+        if (yPosition > 260) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('ALTERNATIVE OPTIONS', margin, yPosition);
+        
+        yPosition += 6;
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        (recommendation as any).alternatives.forEach((alt: string, idx: number) => {
+          pdf.text(`• ${alt}`, margin + 5, yPosition);
+          yPosition += 5;
+        });
+      }
+
+      // Footer
+      const pageCount = pdf.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(128, 128, 128);
+        pdf.setFont('helvetica', 'italic');
+        pdf.text(
+          `TemporalOS - AI-Powered Clinical Decision Support | Page ${i} of ${pageCount}`,
+          pageWidth / 2,
+          pdf.internal.pageSize.getHeight() - 10,
+          { align: 'center' }
+        );
+      }
+
+      // Save PDF
+      const filename = `TemporalOS_Recommendation_${recommendation.medication.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
       
-      setCallStatus(`✅ Call initiated successfully! Call ID: ${result.callId}`);
-      
-      // Clear status after 5 seconds
-      setTimeout(() => {
-        setCallStatus(null);
-        setIsSchedulingCall(false);
-      }, 5000);
+      console.log('[ConfirmationPanel] ✅ PDF exported:', filename);
 
     } catch (error) {
-      console.error('[ConfirmationPanel] ❌ Error scheduling call:', error);
-      setCallStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
-      setTimeout(() => {
-        setCallStatus(null);
-        setIsSchedulingCall(false);
-      }, 5000);
+      console.error('[ConfirmationPanel] ❌ Error exporting PDF:', error);
     }
   };
 
@@ -155,51 +293,29 @@ export const ConfirmationPanel: React.FC<ConfirmationPanelProps> = ({
         </button>
       </div>
 
-      {/* Schedule Follow-up Call Button */}
-      <div className="temporalos-schedule-call" style={{ marginTop: '20px' }}>
+      {/* Export to PDF Button */}
+      <div className="temporalos-action-buttons-secondary" style={{ marginTop: '20px' }}>
         <button 
-          className="temporalos-btn-schedule-call"
-          onClick={handleScheduleCall}
-          disabled={isSchedulingCall}
+          className="temporalos-btn-export-pdf"
+          onClick={handleExportPDF}
           style={{
             width: '100%',
             padding: '12px 20px',
-            background: isSchedulingCall 
-              ? 'linear-gradient(135deg, #95a5a6, #7f8c8d)' 
-              : 'linear-gradient(135deg, #3498db, #2980b9)',
+            background: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
             color: 'white',
             border: 'none',
             borderRadius: '8px',
             fontSize: '14px',
             fontWeight: 600,
-            cursor: isSchedulingCall ? 'not-allowed' : 'pointer',
+            cursor: 'pointer',
             transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(52, 152, 219, 0.3)',
+            boxShadow: '0 4px 12px rgba(155, 89, 182, 0.3)',
             textTransform: 'uppercase',
             letterSpacing: '0.5px'
           }}
         >
-          {isSchedulingCall ? '📞 Calling...' : '📞 Schedule Follow-up Call'}
+          📄 Export to PDF
         </button>
-        
-        {callStatus && (
-          <div 
-            style={{
-              marginTop: '10px',
-              padding: '10px',
-              borderRadius: '6px',
-              background: callStatus.includes('✅') 
-                ? 'rgba(46, 204, 113, 0.1)' 
-                : 'rgba(231, 76, 60, 0.1)',
-              color: callStatus.includes('✅') ? '#27ae60' : '#c0392b',
-              fontSize: '12px',
-              fontWeight: 500,
-              textAlign: 'center'
-            }}
-          >
-            {callStatus}
-          </div>
-        )}
       </div>
 
       {/* Rejection Form */}

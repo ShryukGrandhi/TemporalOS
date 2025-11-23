@@ -11,6 +11,7 @@ import { reasoningRouter } from './routes/reasoning';
 import { stateRouter } from './routes/state';
 import { medicationsRouter } from './routes/medications';
 import { recommendationsRouter } from './routes/recommendations';
+import { vapiRouter } from './routes/vapi';
 
 dotenv.config();
 

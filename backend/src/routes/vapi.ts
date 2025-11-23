@@ -21,12 +21,20 @@ const OutboundCallSchema = z.object({
 vapiRouter.post('/call/outbound', async (req, res) => {
   try {
     console.log('[VAPI] 📞 Outbound call request received');
+    console.log('[VAPI] Request body:', JSON.stringify(req.body, null, 2));
     
     const callData = OutboundCallSchema.parse(req.body);
     const apiKey = process.env.VAPI_API_KEY?.trim();
 
+    // Debug logging
+    console.log('[VAPI] Checking for API key...');
+    console.log('[VAPI] Raw env var:', process.env.VAPI_API_KEY);
+    console.log('[VAPI] API Key present:', !!apiKey);
+    console.log('[VAPI] API Key length:', apiKey?.length || 0);
+    
     if (!apiKey) {
       console.error('[VAPI] ❌ VAPI_API_KEY not configured');
+      console.error('[VAPI] All VAPI-related env vars:', Object.keys(process.env).filter(k => k.includes('VAPI')));
       return res.status(500).json({ 
         error: 'VAPI API key not configured',
         details: 'Please set VAPI_API_KEY in your .env file'

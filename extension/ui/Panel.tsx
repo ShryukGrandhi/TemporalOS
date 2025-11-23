@@ -36,14 +36,14 @@ export const Panel: React.FC<PanelProps> = ({ mode, content, isLoading, sessionI
     setShowGraph(false);
     setShowNormalView(true);
     
-    // Load recommendation for future mode
+    // Load recommendation for future mode ONLY ONCE when entering future mode
     if (mode === 'future' && sessionIdToUse) {
       console.log('[Panel] Loading recommendation for future mode...');
       loadRecommendation();
     } else {
       setRecommendation(null);
     }
-  }, [mode, sessionIdToUse, liveTranscript]); // Re-run when transcript changes
+  }, [mode, sessionIdToUse]); // Removed liveTranscript to prevent loop
 
   const loadRecommendation = async () => {
     // Generate a medication recommendation based on patient context using Gemini AI
@@ -168,19 +168,29 @@ export const Panel: React.FC<PanelProps> = ({ mode, content, isLoading, sessionI
     console.log('[Panel] Approving medication:', recommendation.medication);
     
     try {
+      // Extract patient ID from URL or use fallback
+      const urlParams = new URLSearchParams(window.location.search);
+      const patientId = urlParams.get('patientId') || 'DEMO-PATIENT-001';
+      
       // Log the medication to the system
       await api.confirmMedication({
         sessionId: sessionIdToUse,
-        patientId: 'DEMO-PATIENT-001',
+        patientId,
         medication: recommendation.medication,
         dosage: recommendation.dosage,
         startDate: new Date().toISOString().split('T')[0],
-        confirmedBy: 'TemporalOS'
+        confirmedBy: 'TemporalOS AI'
       });
       
       exportRecommendation(recommendation, 'approved');
-      showNotification(`✅ Approved ${recommendation.medication}!`);
+      showNotification(`✅ Approved ${recommendation.medication}! Added to patient history.`);
+      
+      // Clear recommendation
       setRecommendation(null);
+      
+      // Notify parent to switch to past mode to show the new medication
+      window.dispatchEvent(new CustomEvent('temporalos:switchMode', { detail: 'past' }));
+      
     } catch (error) {
       console.error('[Panel] Error approving medication:', error);
       showNotification('❌ Error approving medication');

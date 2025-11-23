@@ -43,10 +43,20 @@ export const App: React.FC = () => {
       // Don't load demo medications on init - only load when mode is 'past'
     });
 
+    // Listen for mode switch events from Panel (e.g., after approving medication)
+    const handleModeSwitchEvent = (event: any) => {
+      const targetMode = event.detail;
+      console.log('[TemporalOS] Mode switch event received:', targetMode);
+      handleModeChange(targetMode, true); // true = manual
+    };
+    
+    window.addEventListener('temporalos:switchMode', handleModeSwitchEvent);
+
     return () => {
       if (analysisIntervalRef.current) {
         clearInterval(analysisIntervalRef.current);
       }
+      window.removeEventListener('temporalos:switchMode', handleModeSwitchEvent);
     };
   }, []);
   

@@ -35,7 +35,7 @@ export const MedicationAnalysisSchema = z.object({
   graphNodes: z.array(z.object({
     id: z.string(),
     label: z.string(),
-    type: z.enum(['medication', 'condition', 'symptom', 'lab', 'interaction']),
+    type: z.enum(['medication', 'condition', 'symptom', 'lab', 'interaction', 'substance']),
     properties: z.record(z.any()).optional()
   })),
   graphEdges: z.array(z.object({
