@@ -36,6 +36,7 @@ app.use('/api/reasoning', reasoningRouter);
 app.use('/api/state', stateRouter);
 app.use('/api/medications', medicationsRouter);
 app.use('/api/recommendations', recommendationsRouter);
+app.use('/api/vapi', vapiRouter);
 
 // Health check
 app.get('/health', (req, res) => {
