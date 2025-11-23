@@ -5,13 +5,26 @@ import './content.css'; // Import CSS to ensure it's included in build if config
 
 const CONTAINER_ID = 'temporalos-container';
 
+// Security check: ONLY run on Heidi Health domains
+const ALLOWED_DOMAINS = ['heidihealth.com'];
+const currentDomain = window.location.hostname;
+const isHeidiDomain = ALLOWED_DOMAINS.some(domain => currentDomain.includes(domain));
+
+if (!isHeidiDomain) {
+  console.error('[TemporalOS] ❌ SECURITY: This extension only works on Heidi Health websites');
+  console.error('[TemporalOS] ❌ Current domain:', currentDomain, '- Extension disabled.');
+  throw new Error('TemporalOS: Unauthorized domain. Extension disabled for security.');
+}
+
+console.log('[TemporalOS] ✅ Security check passed: Running on Heidi Health domain');
+
 function initialize() {
   // Prevent multiple injections
   if (document.getElementById(CONTAINER_ID)) {
     return;
   }
 
-  console.log('[TemporalOS] Initializing Isolated World Content Script...');
+  console.log('[TemporalOS] Initializing Isolated World Content Script on:', currentDomain);
 
   // Create container
   const container = document.createElement('div');

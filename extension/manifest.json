@@ -13,7 +13,11 @@
   ],
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
+      "matches": [
+        "https://*.heidihealth.com/*",
+        "https://scribe.heidihealth.com/*",
+        "https://app.heidihealth.com/*"
+      ],
       "js": ["dist/content-script.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
@@ -28,7 +32,11 @@
   "web_accessible_resources": [
     {
       "resources": ["content.css"],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "https://*.heidihealth.com/*",
+        "https://scribe.heidihealth.com/*",
+        "https://app.heidihealth.com/*"
+      ]
     }
   ]
 }
