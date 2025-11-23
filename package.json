@@ -1,0 +1,17 @@
+{
+  "name": "temporalos",
+  "version": "1.0.0",
+  "description": "TemporalOS - Dynamic clinical information reorganization",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:extension": "cd extension && npm install",
+    "install:all": "npm run install:backend && npm run install:extension",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:extension": "cd extension && npm run dev",
+    "build:extension": "cd extension && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+

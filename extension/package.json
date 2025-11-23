@@ -1,0 +1,25 @@
+{
+  "name": "temporalos-extension",
+  "version": "1.0.0",
+  "description": "TemporalOS Chrome Extension",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch"
+  },
+  "dependencies": {
+    "cytoscape": "^3.33.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.31",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "css-loader": "^7.1.2",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

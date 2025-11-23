@@ -1,0 +1,757 @@
+/* TemporalOS - Sleek Dark Mode UI with Smooth Animations */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+#temporalos-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --primary: #0a0a0f;
+  --accent: #00d9ff;
+  --past: #6366f1;
+  --present: #f59e0b;
+  --future: #10b981;
+  --bg: rgba(10, 10, 15, 0.95);
+  --bg-secondary: rgba(20, 20, 30, 0.8);
+  --bg-tertiary: rgba(30, 30, 45, 0.6);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --glass: rgba(255, 255, 255, 0.05);
+  --glass-hover: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --glow-past: rgba(99, 102, 241, 0.4);
+  --glow-present: rgba(245, 158, 11, 0.4);
+  --glow-future: rgba(16, 185, 129, 0.4);
+  --glow-accent: rgba(0, 217, 255, 0.4);
+}
+
+/* Smooth animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.8), 0 0 30px rgba(76, 175, 80, 0.4);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--glow-accent);
+  }
+  50% {
+    box-shadow: 0 0 30px var(--glow-accent), 0 0 40px var(--glow-accent);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Mode Strip Styles */
+.temporalos-mode-strip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: linear-gradient(135deg, var(--bg) 0%, var(--bg-secondary) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 24px;
+  z-index: 999999;
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.temporalos-mode-strip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--accent) 50%, 
+    transparent 100%);
+  opacity: 0.5;
+}
+
+.temporalos-mode-button {
+  position: relative;
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.temporalos-mode-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  transition: left 0.5s;
+}
+
+.temporalos-mode-button:hover::before {
+  left: 100%;
+}
+
+.temporalos-mode-button:hover {
+  background: var(--glass-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.temporalos-mode-button.active {
+  background: var(--glass-hover);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  box-shadow: 0 0 20px var(--glow-accent);
+  animation: glow 2s ease-in-out infinite;
+}
+
+.temporalos-mode-button.active.past {
+  border-color: var(--past);
+  box-shadow: 0 0 20px var(--glow-past);
+}
+
+.temporalos-mode-button.active.present {
+  border-color: var(--present);
+  box-shadow: 0 0 20px var(--glow-present);
+}
+
+.temporalos-mode-button.active.future {
+  border-color: var(--future);
+  box-shadow: 0 0 20px var(--glow-future);
+}
+
+.temporalos-mode-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background: var(--text-muted);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.temporalos-mode-button.active .temporalos-mode-indicator {
+  animation: none;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.temporalos-mode-button.active.past .temporalos-mode-indicator {
+  background: var(--past);
+}
+
+.temporalos-mode-button.active.present .temporalos-mode-indicator {
+  background: var(--present);
+}
+
+.temporalos-mode-button.active.future .temporalos-mode-indicator {
+  background: var(--future);
+}
+
+/* Contextual Panel Styles */
+.temporalos-panel {
+  position: fixed;
+  top: 72px;
+  right: 24px;
+  width: 360px;
+  max-height: calc(100vh - 96px);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 
+              0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  z-index: 999998;
+  overflow: hidden;
+  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.temporalos-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--accent) 50%, 
+    transparent 100%);
+  opacity: 0.6;
+}
+
+.temporalos-panel-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.temporalos-panel-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.temporalos-panel-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, var(--accent), var(--past));
+  border-radius: 2px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.temporalos-panel-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--glass);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.temporalos-panel-close:hover {
+  background: var(--glass-hover);
+  color: var(--text-primary);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.temporalos-panel-content {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.temporalos-panel-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.temporalos-panel-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.temporalos-panel-content::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+
+.temporalos-panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+.temporalos-panel-item {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.temporalos-panel-item:nth-child(1) { animation-delay: 0.1s; }
+.temporalos-panel-item:nth-child(2) { animation-delay: 0.2s; }
+.temporalos-panel-item:nth-child(3) { animation-delay: 0.3s; }
+.temporalos-panel-item:nth-child(4) { animation-delay: 0.4s; }
+.temporalos-panel-item:nth-child(5) { animation-delay: 0.5s; }
+
+.temporalos-panel-item:hover {
+  background: var(--glass-hover);
+  border-color: var(--border-hover);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.temporalos-panel-item.highlight {
+  background: linear-gradient(135deg, var(--glass-hover), var(--glass));
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--glow-accent);
+}
+
+.temporalos-panel-item-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.temporalos-panel-item-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.temporalos-panel-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Loading States */
+.temporalos-loading {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .temporalos-panel {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+  }
+  
+  .temporalos-mode-strip {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  
+  .temporalos-mode-button {
+    padding: 6px 16px;
+    font-size: 12px;
+  }
+}
+
+/* Confirmation Panel Styles */
+.temporalos-confirmation-panel {
+  padding: 20px 24px;
+}
+
+.temporalos-recommendation-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.temporalos-recommendation-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.temporalos-dosage {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.temporalos-confidence {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.temporalos-reasoning,
+.temporalos-safety-checklist,
+.temporalos-citations {
+  margin-bottom: 20px;
+}
+
+.temporalos-reasoning h4,
+.temporalos-safety-checklist h4,
+.temporalos-citations h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.temporalos-reasoning ul,
+.temporalos-citations ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.temporalos-reasoning li,
+.temporalos-citations li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  padding-left: 16px;
+  position: relative;
+}
+
+.temporalos-reasoning li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+.checklist-item {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  padding: 8px;
+  background: var(--glass);
+  border-radius: 6px;
+}
+
+.temporalos-action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.temporalos-btn-approve,
+.temporalos-btn-modify,
+.temporalos-btn-reject {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.temporalos-btn-approve {
+  background: #2E7D32;
+  color: white;
+}
+
+.temporalos-btn-approve:hover {
+  background: #1B5E20;
+}
+
+.temporalos-btn-modify {
+  background: #E65100;
+  color: white;
+}
+
+.temporalos-btn-modify:hover {
+  background: #BF360C;
+}
+
+.temporalos-btn-reject {
+  background: #C62828;
+  color: white;
+}
+
+.temporalos-btn-reject:hover {
+  background: #B71C1C;
+}
+
+.temporalos-rejection-form {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--glass);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.temporalos-rejection-form h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.temporalos-rejection-form label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.temporalos-rejection-form input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.temporalos-rejection-form input[type="text"] {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.temporalos-rejection-form button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Enhanced animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Enhanced panel item animations */
+.temporalos-panel-item {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  will-change: transform, opacity;
+}
+
+.temporalos-panel-item::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0, 217, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.temporalos-panel-item:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Enhanced button animations */
+.temporalos-mode-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.temporalos-mode-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.temporalos-mode-button:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Graph container animations */
+.temporalos-panel-content {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Knowledge graph fade in */
+#cytoscape-container {
+  animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Enhanced loading animation */
+.temporalos-loading {
+  position: relative;
+}
+
+.temporalos-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border: 2px solid transparent;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: spin 1s linear infinite;
+}
+
+/* Smooth transitions */
+button, .temporalos-panel-item, .temporalos-mode-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects with scale */
+.temporalos-panel-item:hover {
+  transform: translateX(4px) scale(1.02);
+}
+
+.temporalos-mode-button:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Active state animations */
+.temporalos-mode-button.active {
+  animation: glow 2s ease-in-out infinite, scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
